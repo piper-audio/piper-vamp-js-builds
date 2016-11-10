@@ -4,8 +4,8 @@
 
 #include "Silvet.h"
 
-using piper::PiperAdapter;
-using piper::PiperPluginLibrary;
+using piper_vamp_js::PiperAdapter;
+using piper_vamp_js::PiperPluginLibrary;
 
 static std::string soname("silvet");
 
