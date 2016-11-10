@@ -1,7 +1,8 @@
 
-MODULE_NAME	:= Silvet
+PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
+SILVET_DIR		:= ../../silvet
 
-SILVET_DIR	:= ../silvet
+MODULE_NAME	:= Silvet
 
 SRC_DIR		:= $(SILVET_DIR)/src
 CQ_DIR	     	:= $(SILVET_DIR)/constant-q-cpp
@@ -51,4 +52,4 @@ PLUGIN_C_SOURCES   := $(KFFT_SOURCES)
 
 MODULE_SOURCE	:= silvet.cpp
 
-include Makefile.inc.em
+include $(PIPER_VAMP_JS_DIR)/Makefile.inc
