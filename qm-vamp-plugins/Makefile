@@ -8,7 +8,7 @@ QMV	:= $(QM_VAMP_PLUGINS_DIR)
 DSP	:= $(QMV)/qm-dsp
 EXT	:= $(DSP)/ext
 
-INCPATH	:= -I$(QMV) -I$(DSP) -I$(EXT)/kissfft -I$(EXT)/kissfft/tools
+INCLUDES	:= -I$(QMV) -I$(DSP) -I$(EXT)/kissfft -I$(EXT)/kissfft/tools
 DEFINES := -DNO_BLAS_WRAP -DADD_ -Dkiss_fft_scalar=double -I$(EXT)/clapack/include -I$(EXT)/cblas/include
 
 CLAPACK_SOURCES := \
