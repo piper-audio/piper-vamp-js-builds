@@ -115,4 +115,6 @@ C_SOURCES	:= \
 
 MODULE_SOURCE	:= qm-vamp-plugins.cpp
 
+EMFLAGS		:= -s TOTAL_MEMORY=100000000
+
 include $(PIPER_VAMP_JS_DIR)/Makefile.inc
