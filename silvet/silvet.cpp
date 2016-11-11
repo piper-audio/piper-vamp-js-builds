@@ -1,36 +1,12 @@
+/* -*- c-basic-offset: 4 indent-tabs-mode: nil -*-  vi:set ts=8 sts=4 sw=4: */
 
-#include "PiperAdapter.h"
-#include "PiperPluginLibrary.h"
-
+#include "PiperExport.h"
 #include "Silvet.h"
-
-using piper_vamp_js::PiperAdapter;
-using piper_vamp_js::PiperPluginLibrary;
 
 static std::string soname("silvet");
 
-static PiperAdapter<Silvet> silvetAdapter(soname);
+static piper_vamp_js::PiperAdapter<Silvet> silvetAdapter(soname);
+static piper_vamp_js::PiperPluginLibrary library({ &silvetAdapter });
 
-static PiperPluginLibrary library({
-    &silvetAdapter
-});
-
-extern "C" {
-
-const char *piperRequestJson(const char *request) {
-    return library.requestJson(request);
-}
-
-const char *piperProcessRaw(int handle,
-                              const float *const *inputBuffers,
-                              int sec,
-                              int nsec) {
-    return library.processRaw(handle, inputBuffers, sec, nsec);
-}
-    
-void piperFreeJson(const char *json) {
-    return library.freeJson(json);
-}
-
-}
+PIPER_EXPORT_LIBRARY(library);
 

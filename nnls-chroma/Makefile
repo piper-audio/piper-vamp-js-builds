@@ -19,7 +19,10 @@ C_SOURCE_FILES	:= \
 PLUGIN_SOURCES		:= $(addprefix $(PLUGIN_SRC_DIR)/,$(SOURCE_FILES))
 PLUGIN_C_SOURCES 	:= $(addprefix $(PLUGIN_SRC_DIR)/,$(C_SOURCE_FILES))
 
-INCLUDES	:= -I$(PLUGIN_SRC_DIR) -I../../vamp-build-and-test/DEPENDENCIES/generic/include
+INCLUDES	:= \
+		-I$(PLUGIN_SRC_DIR) \
+		-I../../DEPENDENCIES/generic/include \
+		-I../../vamp-build-and-test/DEPENDENCIES/generic/include
 
 EMFLAGS		:= -s TOTAL_MEMORY=100000000 -s NO_FILESYSTEM=0
 

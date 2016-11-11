@@ -2,7 +2,8 @@
 PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
 SILVET_DIR		:= ../../silvet
 
-MODULE_NAME	:= Silvet
+MODULE_NAME		:= Silvet
+MODULE_SOURCE		:= silvet.cpp
 
 SRC_DIR		:= $(SILVET_DIR)/src
 CQ_DIR	     	:= $(SILVET_DIR)/constant-q-cpp
@@ -13,7 +14,7 @@ FD_DIR	     	:= $(SILVET_DIR)/flattendynamics
 
 INCLUDES	:= -I$(SRC_DIR) -I$(CQ_DIR) -I$(CQ_DIR)/cq -I$(KFFT_DIR) -I$(KFFT_DIR)/tools -I$(SILVET_DIR) -I$(FD_DIR) -I$(BQVEC_DIR)
 
-EMFLAGS		:= -s TOTAL_MEMORY=100000000
+EMFLAGS		:= -s TOTAL_MEMORY=100000000 -s NO_FILESYSTEM=0
 
 DEFINES		:= -Dkiss_fft_scalar=double
 
@@ -49,7 +50,5 @@ KFFT_SOURCES    := \
 PLUGIN_SOURCES	:= $(PLUGIN_SOURCES) $(BQVEC_SOURCES) $(FD_SOURCES) $(CQ_SOURCES)
 
 PLUGIN_C_SOURCES   := $(KFFT_SOURCES)
-
-MODULE_SOURCE	:= silvet.cpp
 
 include $(PIPER_VAMP_JS_DIR)/Makefile.inc
