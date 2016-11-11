@@ -1,17 +1,14 @@
 
 PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
-MATCH_VAMP_DIR		:= ../../match-vamp
+PLUGIN_SRC_DIR		:= ../../match-vamp/src
 
-MODULE_NAME	:= MatchVampPlugin
+MODULE_NAME		:= MatchVampPlugin
+MODULE_SOURCE		:= match-vamp-plugin.cpp
 
-SRC_DIR		:= $(MATCH_VAMP_DIR)/src
+PLUGIN_SOURCES	:= $(wildcard $(PLUGIN_SRC_DIR)/*.cpp)
 
-PLUGIN_SOURCES	:= $(wildcard $(SRC_DIR)/*.cpp)
-
-INCLUDES	:= -I$(SRC_DIR)
+INCLUDES	:= -I$(PLUGIN_SRC_DIR)
 DEFINES		:= -DUSE_COMPACT_TYPES
 EMFLAGS		:= -s TOTAL_MEMORY=100000000
-
-MODULE_SOURCE	:= match-vamp-plugin.cpp
 
 include $(PIPER_VAMP_JS_DIR)/Makefile.inc

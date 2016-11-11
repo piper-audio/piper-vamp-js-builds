@@ -2,25 +2,24 @@
 PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
 PLUGIN_SRC_DIR		:= ../../nnls-chroma
 
-MODULE_NAME	:= NNLSChroma
+MODULE_NAME		:= NNLSChroma
+MODULE_SOURCE		:= nnls-chroma.cpp
 
 SOURCE_FILES	:= \
-	chromamethods.cpp \
-	NNLSBase.cpp \
-	NNLSChroma.cpp \
-	Chordino.cpp \
-	Tuning.cpp \
-	viterbi.cpp
+		chromamethods.cpp \
+		NNLSBase.cpp \
+		NNLSChroma.cpp \
+		Chordino.cpp \
+		Tuning.cpp \
+		viterbi.cpp
 
 C_SOURCE_FILES	:= \
-	nnls.c
+		nnls.c
 
-PLUGIN_SOURCES	:= $(addprefix $(PLUGIN_SRC_DIR)/,$(SOURCE_FILES))
-PLUGIN_C_SOURCES := $(addprefix $(PLUGIN_SRC_DIR)/,$(C_SOURCE_FILES))
+PLUGIN_SOURCES		:= $(addprefix $(PLUGIN_SRC_DIR)/,$(SOURCE_FILES))
+PLUGIN_C_SOURCES 	:= $(addprefix $(PLUGIN_SRC_DIR)/,$(C_SOURCE_FILES))
 
 INCLUDES	:= -I$(PLUGIN_SRC_DIR) -I../../vamp-build-and-test/DEPENDENCIES/generic/include
-
-MODULE_SOURCE	:= nnls-chroma.cpp
 
 EMFLAGS		:= -s TOTAL_MEMORY=100000000 -s NO_FILESYSTEM=0
 
