@@ -22,13 +22,7 @@ ls -l */*.js
 for x in *; do
     if [ -d "$x" ] && [ -f "$x/Makefile" ]; then
 	echo
-	js=$(echo "$x"/*.js)
-	if [ ! -f "$js" ]; then
-	    echo "Problem running test for $x: more than one js file? (js=$js)"
-	else
-	    node ../piper-vamp-js/test/node-load-test.js "$(pwd)/$js" && \
-		echo "Successfully ran basic load-test on $js"
-	fi
+        make -C "$x" test
     fi
 done
 
