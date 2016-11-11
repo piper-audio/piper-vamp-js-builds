@@ -16,9 +16,6 @@ for x in *; do
     fi
 done
 
-echo "Compiled:"
-ls -l */*.js
-
 for x in *; do
     if [ -d "$x" ] && [ -f "$x/Makefile" ]; then
 	echo
@@ -28,4 +25,7 @@ done
 
 echo
 echo "All done"
+
+echo "Outputs:"
+ls -l */*.js
 
