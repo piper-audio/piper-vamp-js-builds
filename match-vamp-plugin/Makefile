@@ -9,6 +9,7 @@ PLUGIN_SOURCES	:= $(wildcard $(PLUGIN_SRC_DIR)/*.cpp)
 
 INCLUDES	:= -I$(PLUGIN_SRC_DIR)
 DEFINES		:= -DUSE_COMPACT_TYPES
+OPTFLAGS	:= -O3 -ffast-math
 EMFLAGS		:= -s TOTAL_MEMORY=100000000
 
 include $(PIPER_VAMP_JS_DIR)/Makefile.inc
