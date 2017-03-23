@@ -25,6 +25,6 @@ INCLUDES	:= \
 		-I../../DEPENDENCIES/generic/include \
 		-I../../vamp-build-and-test/DEPENDENCIES/generic/include
 
-EMFLAGS		:= -s TOTAL_MEMORY=100000000
+EMFLAGS		:= -s ALLOW_MEMORY_GROWTH=1
 
 include $(PIPER_VAMP_JS_DIR)/Makefile.inc
