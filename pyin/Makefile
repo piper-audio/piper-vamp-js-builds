@@ -12,7 +12,6 @@ SOURCE_FILES	:= \
 		Yin.cpp \
 		YinUtil.cpp \
 		MonoNote.cpp \
-		MonoPitch.cpp \
 		MonoNoteParameters.cpp \
 		SparseHMM.cpp \
 		MonoNoteHMM.cpp \
@@ -25,6 +24,6 @@ INCLUDES	:= \
 		-I../../DEPENDENCIES/generic/include \
 		-I../../vamp-build-and-test/DEPENDENCIES/generic/include
 
-EMFLAGS		:= -s ALLOW_MEMORY_GROWTH=1
+EMFLAGS		:= -s TOTAL_MEMORY=268435456
 
 include $(PIPER_VAMP_JS_DIR)/Makefile.inc
