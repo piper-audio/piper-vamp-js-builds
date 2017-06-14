@@ -1,24 +1,38 @@
-/* -*- c-basic-offset: 4 indent-tabs-mode: nil -*-  vi:set ts=8 sts=4 sw=4: */
 
 #include "PiperExport.h"
+
 #include "CQVamp.h"
 #include "CQChromaVamp.h"
 
-static std::string soname("cqvamp");
+using piper_vamp_js::PiperAdapter;
+using piper_vamp_js::PiperAdapterBase;
+using piper_vamp_js::PiperPluginLibrary;
 
-class CQVampMIDIParamsAdapter : public piper_vamp_js::PiperAdapterBase<CQVamp>
+static std::string libname("cqvamp");
+
+piper_vamp::StaticOutputInfo cqStaticOutputInfo {
+    { "constantq",
+        { "http://purl.org/ontology/af/Spectrogram" }
+    }
+};
+
+class CQVampMIDIParamsAdapter : public PiperAdapterBase<CQVamp>
 {
 public:
-    CQVampMIDIParamsAdapter() : PiperAdapterBase<CQVamp>(soname) { }
+    CQVampMIDIParamsAdapter() : PiperAdapterBase<CQVamp>(libname,
+                                                         { "Visualisation" },
+                                                         cqStaticOutputInfo) { }
     virtual Vamp::Plugin *createPlugin(float inputSampleRate) const override {
         return new CQVamp(inputSampleRate, true);
     }
 };
 
-class CQVampHzParamsAdapter : public piper_vamp_js::PiperAdapterBase<CQVamp>
+class CQVampHzParamsAdapter : public PiperAdapterBase<CQVamp>
 {
 public:
-    CQVampHzParamsAdapter() : PiperAdapterBase<CQVamp>(soname) { }
+    CQVampHzParamsAdapter() : PiperAdapterBase<CQVamp>(libname,
+                                                       { "Visualisation" },
+                                                       cqStaticOutputInfo) { }
     virtual Vamp::Plugin *createPlugin(float inputSampleRate) const override {
         return new CQVamp(inputSampleRate, false);
     }
@@ -27,12 +41,22 @@ public:
 static CQVampMIDIParamsAdapter cqVampMIDIParamsAdapter;
 static CQVampHzParamsAdapter   cqVampHzParamsAdapter;
 
-static piper_vamp_js::PiperAdapter<CQChromaVamp> cqChromaVampAdapter(soname);
+static PiperAdapter<CQChromaVamp>
+cqChromaVampAdapter(
+    libname,
+    { "Visualisation" },
+    {
+        { "chromagram",
+            { "http://purl.org/ontology/af/Chromagram" }
+        }
+    }
+    );
 
-static piper_vamp_js::PiperPluginLibrary library({
-        &cqVampMIDIParamsAdapter,
-        &cqVampHzParamsAdapter,
-        &cqChromaVampAdapter
-    });
+static PiperPluginLibrary library({
+    &cqVampMIDIParamsAdapter,
+    &cqVampHzParamsAdapter,
+    &cqChromaVampAdapter
+});
 
 PIPER_EXPORT_LIBRARY(library);
+

@@ -1,4 +1,3 @@
-/* -*- c-basic-offset: 4 indent-tabs-mode: nil -*-  vi:set ts=8 sts=4 sw=4: */
 
 #include "PiperExport.h"
 
@@ -7,9 +6,21 @@
 using piper_vamp_js::PiperAdapter;
 using piper_vamp_js::PiperPluginLibrary;
 
-static std::string soname("cepstral-pitchtracker");
+static std::string libname("cepstral-pitchtracker");
 
-static PiperAdapter<CepstralPitchTracker> cepstralPitchTrackerAdapter(soname);
+static PiperAdapter<CepstralPitchTracker>
+cepstralPitchTrackerAdapter(
+    libname,
+    { "Notes" },
+    {
+        { "f0",
+            { "http://purl.org/ontology/af/Pitch" }
+        },
+        { "notes",
+            { "http://purl.org/ontology/af/Note" }
+        }
+    }
+    );
 
 static PiperPluginLibrary library({
     &cepstralPitchTrackerAdapter

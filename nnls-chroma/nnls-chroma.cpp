@@ -1,4 +1,3 @@
-/* -*- c-basic-offset: 4 indent-tabs-mode: nil -*-  vi:set ts=8 sts=4 sw=4: */
 
 #include "PiperExport.h"
 
@@ -6,14 +5,75 @@
 #include "Chordino.h"
 #include "Tuning.h"
 
-std::string soname("nnls-chroma");
+using piper_vamp_js::PiperAdapter;
+using piper_vamp_js::PiperPluginLibrary;
 
-piper_vamp_js::PiperAdapter<NNLSChroma> chromaAdapter(soname);
-piper_vamp_js::PiperAdapter<Chordino> chordinoAdapter(soname);
-piper_vamp_js::PiperAdapter<Tuning> tuningAdapter(soname);
+static std::string libname("nnls-chroma");
 
-piper_vamp_js::PiperPluginLibrary library({
-        &chromaAdapter, &chordinoAdapter, &tuningAdapter
+static PiperAdapter<NNLSChroma>
+nnlsChromaAdapter(
+    libname,
+    { "Visualisation" },
+    {
+        { "logfreqspec",
+            { "http://purl.org/ontology/af/Spectrogram" }
+        },
+        { "tunedlogfreqspec",
+            { "http://purl.org/ontology/af/Spectrogram" }
+        },
+        { "semitonespectrum",
+            { "http://purl.org/ontology/af/Spectrogram" }
+        },
+        { "chroma",
+            { "http://purl.org/ontology/af/Chromagram" }
+        },
+        { "basschroma",
+            { "http://purl.org/ontology/af/Chromagram" }
+        },
+        { "bothchroma",
+            { "http://purl.org/ontology/af/Chromagram" }
+        }
+    }
+    );
+
+static PiperAdapter<Chordino>
+chordinoAdapter(
+    libname,
+    { "Notes" },
+    {
+        { "simplechord",
+            { "http://purl.org/ontology/af/ChordSegment" }
+        },
+        { "chordnotes",
+            { "" }
+        },
+        { "harmonicchange",
+            { "http://purl.org/ontology/af/TonalChangeDetectionFunction" }
+        },
+        { "loglikelihood",
+            { "" }
+        }
+    }
+    );
+
+static PiperAdapter<Tuning>
+tuningAdapter(
+    libname,
+    { "Key and Tonality" },
+    {
+        { "tuning",
+            { "http://purl.org/ontology/af/MusicSegment" }
+        },
+        { "localtuning",
+            { "" }
+        }
+    }
+    );
+
+static PiperPluginLibrary library({
+    &nnlsChromaAdapter,
+    &chordinoAdapter,
+    &tuningAdapter
 });
 
 PIPER_EXPORT_LIBRARY(library);
