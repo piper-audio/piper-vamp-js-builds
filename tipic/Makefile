@@ -1,7 +1,6 @@
 
-PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
-
-PLUGIN_DIR		:= ../../tipic
+PIPER_VAMP_JS_DIR	:= ../ext/piper-vamp-js
+PLUGIN_DIR		:= ../ext/tipic
 
 SRC_DIR			:= $(PLUGIN_DIR)/src
 QMDSP_DIR    		:= $(PLUGIN_DIR)/qm-dsp

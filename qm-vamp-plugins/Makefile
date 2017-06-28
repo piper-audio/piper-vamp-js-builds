@@ -1,6 +1,6 @@
 
-PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
-QM_VAMP_PLUGINS_DIR	:= ../../qm-vamp-plugins
+PIPER_VAMP_JS_DIR	:= ../ext/piper-vamp-js
+QM_VAMP_PLUGINS_DIR	:= ../ext/qm-vamp-plugins
 
 MODULE_NAME	:= QMVampPlugins
 

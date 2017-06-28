@@ -1,6 +1,6 @@
 
-PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
-PLUGIN_SRC_DIR		:= ../../pyin
+PIPER_VAMP_JS_DIR	:= ../ext/piper-vamp-js
+PLUGIN_SRC_DIR		:= ../ext/pyin
 
 MODULE_NAME		:= PYin
 MODULE_SOURCE		:= pyin.cpp
@@ -21,8 +21,7 @@ PLUGIN_SOURCES	:= $(addprefix $(PLUGIN_SRC_DIR)/,$(SOURCE_FILES))
 
 INCLUDES	:= \
 		-I$(PLUGIN_SRC_DIR) \
-		-I../../DEPENDENCIES/generic/include \
-		-I../../vamp-build-and-test/DEPENDENCIES/generic/include
+		-I../ext/vamp-build-and-test/DEPENDENCIES/generic/include
 
 EMFLAGS		:= -s TOTAL_MEMORY=33554432
 

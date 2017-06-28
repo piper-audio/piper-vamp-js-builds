@@ -1,0 +1,46 @@
+{
+  "libs": {
+    "vamp-plugin-sdk": {
+      "pin": "5d9af3140f05"
+    },
+    "piper": {
+      "pin": "169626171d22e6c49c6bc4759283406f4336a5cb"
+    },
+    "piper-vamp-cpp": {
+      "pin": "b146634c3686168a9d4bb739986d065b5d2d40a2"
+    },
+    "piper-vamp-js": {
+      "pin": "06b800f3176c4a932b0738abf7bec41282d15a1e"
+    },
+    "vamp-test-plugin": {
+      "pin": "96cb7ef3cc24"
+    },
+    "vamp-build-and-test": {
+      "pin": "06c2a5337d56"
+    },
+    "cepstral-pitchtracker": {
+      "pin": "759ea6e988fe"
+    },
+    "constant-q-cpp": {
+      "pin": "445f94d0cb4e"
+    },
+    "match-vamp-plugin": {
+      "pin": "4b272c839f7e"
+    },
+    "nnls-chroma": {
+      "pin": "6bfce96d87b4"
+    },
+    "pyin": {
+      "pin": "550d5f186abb"
+    },
+    "qm-vamp-plugins": {
+      "pin": "50042f3189ca"
+    },
+    "silvet": {
+      "pin": "426ce52ef096"
+    },
+    "tipic": {
+      "pin": "cbebb8a657ea"
+    }
+  }
+}

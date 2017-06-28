@@ -1,6 +1,6 @@
 
-PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
-PLUGIN_SRC_DIR		:= ../../vamp-test-plugin
+PIPER_VAMP_JS_DIR	:= ../ext/piper-vamp-js
+PLUGIN_SRC_DIR		:= ../ext/vamp-test-plugin
 
 MODULE_NAME		:= VampTestPlugin
 MODULE_SOURCE		:= vamp-test-plugin.cpp

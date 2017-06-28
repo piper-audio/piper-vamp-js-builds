@@ -1,0 +1,75 @@
+{
+    "config": {
+        "extdir": "ext"
+    },
+    "providers": {
+	"soundsoftware": {
+	    "vcs": ["hg", "git"],
+	    "anon": "https://code.soundsoftware.ac.uk/{vcs}/{repo}",
+	    "auth": "https://{account}@code.soundsoftware.ac.uk/{vcs}/{repo}"
+	}
+    },
+    "libs": {
+        "vamp-plugin-sdk": {
+            "vcs": "hg",
+            "service": "soundsoftware"
+        },
+        "piper": {
+            "vcs": "git",
+	    "service": "github",
+	    "owner": "piper-audio"
+        },
+        "piper-vamp-cpp": {
+            "vcs": "git",
+	    "service": "github",
+	    "owner": "piper-audio"
+        },
+        "piper-vamp-js": {
+            "vcs": "git",
+	    "service": "github",
+	    "owner": "piper-audio"
+        },
+        "vamp-test-plugin": {
+            "vcs": "hg",
+            "service": "soundsoftware"
+        },
+        "vamp-build-and-test": {
+            "vcs": "hg",
+            "service": "soundsoftware"
+        },
+        "cepstral-pitchtracker": {
+            "vcs": "hg",
+            "service": "soundsoftware"
+        },
+        "constant-q-cpp": {
+            "vcs": "hg",
+            "service": "soundsoftware"
+        },
+        "match-vamp-plugin": {
+            "vcs": "hg",
+            "service": "soundsoftware",
+            "repository": "match-vamp"
+        },
+        "nnls-chroma": {
+            "vcs": "hg",
+            "service": "soundsoftware"
+        },
+        "pyin": {
+            "vcs": "hg",
+            "service": "soundsoftware"
+        },
+        "qm-vamp-plugins": {
+            "vcs": "hg",
+            "service": "soundsoftware"
+        },
+        "silvet": {
+            "vcs": "hg",
+            "service": "soundsoftware"
+        },
+        "tipic": {
+            "vcs": "hg",
+            "service": "soundsoftware"
+        }
+    }
+}
+

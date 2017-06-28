@@ -1,7 +1,7 @@
 
-PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
+PIPER_VAMP_JS_DIR	:= ../ext/piper-vamp-js
 
-PLUGIN_DIR		:= ../../cepstral-pitchtracker
+PLUGIN_DIR		:= ../ext/cepstral-pitchtracker
 
 SRC_DIR			:= $(PLUGIN_DIR)
 

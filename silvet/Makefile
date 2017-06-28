@@ -1,6 +1,6 @@
 
-PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
-SILVET_DIR		:= ../../silvet
+PIPER_VAMP_JS_DIR	:= ../ext/piper-vamp-js
+SILVET_DIR		:= ../ext/silvet
 
 MODULE_NAME		:= Silvet
 MODULE_SOURCE		:= silvet.cpp

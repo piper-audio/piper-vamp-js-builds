@@ -1,6 +1,6 @@
 
-PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
-PLUGIN_SRC_DIR		:= ../../match-vamp/src
+PIPER_VAMP_JS_DIR	:= ../ext/piper-vamp-js
+PLUGIN_SRC_DIR		:= ../ext/match-vamp-plugin/src
 
 MODULE_NAME		:= MatchVampPlugin
 MODULE_SOURCE		:= match-vamp-plugin.cpp

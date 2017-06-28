@@ -1,5 +1,6 @@
-PIPER_VAMP_JS_DIR	:= ../../piper-vamp-js
-PLUGIN_SRC_DIR		:= ../../constant-q-cpp
+
+PIPER_VAMP_JS_DIR	:= ../ext/piper-vamp-js
+PLUGIN_SRC_DIR		:= ../ext/constant-q-cpp
 
 MODULE_NAME		:= CQ
 MODULE_SOURCE		:= cqvamp.cpp
