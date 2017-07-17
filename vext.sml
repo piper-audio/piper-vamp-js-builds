@@ -33,7 +33,7 @@
     Software without prior written authorization.
 *)
 
-val vext_version = "0.9.2"
+val vext_version = "0.9.6"
 
 
 datatype vcs =
@@ -48,9 +48,11 @@ datatype source =
              repo : string option
          }
 
+type id_or_tag = string
+
 datatype pin =
          UNPINNED |
-         PINNED of string
+         PINNED of id_or_tag
 
 datatype libstate =
          ABSENT |
@@ -60,7 +62,8 @@ datatype libstate =
 
 datatype localstate =
          MODIFIED |
-         UNMODIFIED
+         LOCK_MISMATCHED |
+         CLEAN
 
 datatype branch =
          BRANCH of string |
@@ -77,21 +80,20 @@ datatype 'a result =
 
 type libname = string
 
-type id_or_tag = string
-
 type libspec = {
     libname : libname,
     vcs : vcs,
     source : source,
     branch : branch,
-    pin : pin
+    project_pin : pin,
+    lock_pin : pin
 }
 
 type lock = {
     libname : libname,
     id_or_tag : id_or_tag
 }
-                   
+
 type remote_spec = {
     anon : string option,
     auth : string option
@@ -177,6 +179,7 @@ signature LIB_CONTROL = sig
     val review : context -> libspec -> (libstate * localstate) result
     val status : context -> libspec -> (libstate * localstate) result
     val update : context -> libspec -> id_or_tag result
+    val id_of : context -> libspec -> id_or_tag result
 end
 
 structure FileBits :> sig
@@ -402,7 +405,8 @@ functor LibControlFn (V: VCS_CONTROL) :> LIB_CONTROL = struct
        - ABSENT: Repo doesn't exist here at all.
     *)
 
-    fun check with_network context ({ libname, branch, pin, ... } : libspec) =
+    fun check with_network context
+              ({ libname, branch, project_pin, lock_pin, ... } : libspec) =
         let fun check_unpinned () =
                 let val is_newest = if with_network
                                     then V.is_newest
@@ -422,26 +426,39 @@ functor LibControlFn (V: VCS_CONTROL) :> LIB_CONTROL = struct
                     ERROR e => ERROR e
                   | OK true => OK CORRECT
                   | OK false => OK WRONG
-            fun check' () =
-                case pin of
+            fun check_remote () =
+                case project_pin of
                     UNPINNED => check_unpinned ()
                   | PINNED target => check_pinned target
+            fun check_local () =
+                case V.is_modified_locally context libname of
+                    ERROR e => ERROR e
+                  | OK true  => OK MODIFIED
+                  | OK false => 
+                    case lock_pin of
+                        UNPINNED => OK CLEAN
+                      | PINNED target =>
+                        case V.is_at context (libname, target) of
+                            ERROR e => ERROR e
+                          | OK true => OK CLEAN
+                          | OK false => OK LOCK_MISMATCHED
         in
             case V.exists context libname of
                 ERROR e => ERROR e
-              | OK false => OK (ABSENT, UNMODIFIED)
+              | OK false => OK (ABSENT, CLEAN)
               | OK true =>
-                case (check' (), V.is_modified_locally context libname) of
+                case (check_remote (), check_local ()) of
                     (ERROR e, _) => ERROR e
                   | (_, ERROR e) => ERROR e
-                  | (OK state, OK true) => OK (state, MODIFIED)
-                  | (OK state, OK false) => OK (state, UNMODIFIED)
+                  | (OK r, OK l) => OK (r, l)
         end
 
     val review = check true
     val status = check false
-                         
-    fun update context ({ libname, source, branch, pin, ... } : libspec) =
+
+    fun update context
+               ({ libname, source, branch,
+                  project_pin, lock_pin, ... } : libspec) =
         let fun update_unpinned () =
                 case V.is_newest context (libname, branch) of
                     ERROR e => ERROR e
@@ -453,9 +470,12 @@ functor LibControlFn (V: VCS_CONTROL) :> LIB_CONTROL = struct
                   | OK true => OK target
                   | OK false => V.update_to context (libname, target)
             fun update' () =
-                case pin of
-                    UNPINNED => update_unpinned ()
-                  | PINNED target => update_pinned target
+                case lock_pin of
+                    PINNED target => update_pinned target
+                  | UNPINNED =>
+                    case project_pin of
+                        PINNED target => update_pinned target
+                      | UNPINNED => update_unpinned ()
         in
             case V.exists context libname of
                 ERROR e => ERROR e
@@ -465,6 +485,10 @@ functor LibControlFn (V: VCS_CONTROL) :> LIB_CONTROL = struct
                     ERROR e => ERROR e
                   | OK () => update' ()
         end
+
+    fun id_of context ({ libname, ... } : libspec) =
+        V.id_of context libname
+                
 end
 
 (* Simple Standard ML JSON parser
@@ -889,11 +913,12 @@ end = struct
           | Json.ERROR e => raise Fail ("Failed to parse file: " ^ e)
 
     fun save_json_to filename json =
+        (* using binary I/O to avoid ever writing CR/LF line endings *)
         let val jstr = Json.serialiseIndented json
-            val stream = TextIO.openOut filename
+            val stream = BinIO.openOut filename
         in
-            TextIO.output (stream, jstr);
-            TextIO.closeOut stream
+            BinIO.output (stream, Byte.stringToBytes jstr);
+            BinIO.closeOut stream
         end
                                   
     fun lookup_optional json kk =
@@ -945,16 +970,16 @@ end = struct
             service = "bitbucket",
             supports = [HG, GIT],
             remote_spec = {
-                anon = SOME "https://bitbucket.org/{owner}/{repo}",
-                auth = SOME "ssh://{vcs}@bitbucket.org/{owner}/{repo}"
+                anon = SOME "https://bitbucket.org/{owner}/{repository}",
+                auth = SOME "ssh://{vcs}@bitbucket.org/{owner}/{repository}"
             }
           },
           {
             service = "github",
             supports = [GIT],
             remote_spec = {
-                anon = SOME "https://github.com/{owner}/{repo}",
-                auth = SOME "ssh://{vcs}@github.com/{owner}/{repo}"
+                anon = SOME "https://github.com/{owner}/{repository}",
+                auth = SOME "ssh://{vcs}@github.com/{owner}/{repository}"
             }
           }
         ]
@@ -981,8 +1006,8 @@ end = struct
                           vv
                     | _ => raise Fail "Array expected for vcs",
                   remote_spec = {
-                      anon = lookup_optional_string pjson ["anon"],
-                      auth = lookup_optional_string pjson ["auth"]
+                      anon = lookup_optional_string pjson ["anonymous"],
+                      auth = lookup_optional_string pjson ["authenticated"]
                   }
                 }
             val loaded = 
@@ -1013,7 +1038,7 @@ end = struct
                          SOME ostr => ostr
                        | NONE => raise Fail ("Owner not specified for service " ^
                                              service))
-                  | "repo" => repo
+                  | "repository" => repo
                   | "account" =>
                     (case login of
                          SOME acc => acc
@@ -1059,8 +1084,9 @@ end = struct
                     (SOME _, SOME auth, _) => expand_spec auth req login
                   | (SOME _, _, SOME anon) => expand_spec anon req NONE
                   | (NONE,   _, SOME anon) => expand_spec anon req NONE
-                  | _ => raise Fail ("No suitable anon/auth URL spec " ^
-                                     "provided for service \"" ^ service ^ "\"")
+                  | _ => raise Fail ("No suitable anonymous or authenticated " ^
+                                     "URL spec provided for service \"" ^
+                                     service ^ "\"")
 
     fun login_for ({ accounts, ... } : context) service =
         case List.find (fn a => service = #service a) accounts of
@@ -1206,15 +1232,15 @@ structure HgControl :> VCS_CONTROL = struct
     fun update_to context (libname, "") =
         ERROR "Non-empty id (tag or revision id) required for update_to"
       | update_to context (libname, id) = 
-        case hg_command context libname ["update", "-r" ^ id] of
-            OK () => id_of context libname
-          | ERROR _ => 
-            case pull context libname of
-                ERROR e => ERROR e
-              | _ =>
-                case hg_command context libname ["update", "-r" ^ id] of
-                    ERROR e => ERROR e
-                  | _ => id_of context libname
+        let val pull_result = pull context libname
+        in
+            case hg_command context libname ["update", "-r", id] of
+                OK _ => id_of context libname
+              | ERROR e =>
+                case pull_result of
+                    ERROR e' => ERROR e' (* this was the ur-error *)
+                  | _ => ERROR e
+        end
                   
 end
 
@@ -1270,11 +1296,11 @@ structure GitControl :> VCS_CONTROL = struct
             then OK true
             else 
                 case git_command_output context libname
-                                        ["rev-list", "-1", id_or_tag] of
-                    ERROR e => OK false (* id_or_tag is not an id or tag, but
-                                           that could just mean it hasn't been
-                                           fetched *)
-                  | OK tid => OK (tid = id)
+                                        ["show-ref",
+                                         "refs/tags/" ^ id_or_tag] of
+                    OK "" => OK false
+                  | ERROR _ => OK false
+                  | OK s => OK (id = hd (String.tokens (fn c => c = #" ") s))
 
     fun branch_tip context (libname, branch) =
         git_command_output context libname
@@ -1332,21 +1358,26 @@ structure GitControl :> VCS_CONTROL = struct
               | _ => id_of context libname
 
     (* This function is dealing with a specific id or tag, so if we
-       can successfully check it out (detached) then that's all we need
-       to do. Otherwise we need to fetch and try again *)
+       can successfully check it out (detached) then that's all we
+       need to do, regardless of whether fetch succeeded or not. We do
+       attempt the fetch first, though, purely in order to avoid ugly
+       error messages in the common case where we're being asked to
+       update to a new pin (from the lock file) that hasn't been
+       fetched yet. *)
 
     fun update_to context (libname, "") = 
         ERROR "Non-empty id (tag or revision id) required for update_to"
       | update_to context (libname, id) =
-        case git_command context libname ["checkout", "--detach", id] of
-            OK () => id_of context libname
-          | ERROR _ => 
-            case git_command context libname ["fetch"] of
-                ERROR e => ERROR e
-              | _ =>
-                case git_command context libname ["checkout", "--detach", id] of
-                    ERROR e => ERROR e
-                  | _ => id_of context libname
+        let val fetch_result = git_command context libname ["fetch"]
+        in
+            case git_command context libname ["checkout", "--detach", id] of
+                OK _ => id_of context libname
+              | ERROR e =>
+                case fetch_result of
+                    ERROR e' => ERROR e' (* this was the ur-error *)
+                  | _ => ERROR e
+        end
+            
 end
 
 structure AnyLibControl :> LIB_CONTROL = struct
@@ -1362,11 +1393,16 @@ structure AnyLibControl :> LIB_CONTROL = struct
 
     fun update context (spec as { vcs, ... } : libspec) =
         (fn HG => H.update | GIT => G.update) vcs context spec
+
+    fun id_of context (spec as { vcs, ... } : libspec) =
+        (fn HG => H.id_of | GIT => G.id_of) vcs context spec
 end
 
+val libobjname = "libraries"
+                                             
 fun load_libspec spec_json lock_json libname : libspec =
     let open JsonBits
-        val libobj   = lookup_mandatory spec_json ["libs", libname]
+        val libobj   = lookup_mandatory spec_json [libobjname, libname]
         val vcs      = lookup_mandatory_string libobj ["vcs"]
         val retrieve = lookup_optional_string libobj
         val service  = retrieve ["service"]
@@ -1374,10 +1410,14 @@ fun load_libspec spec_json lock_json libname : libspec =
         val repo     = retrieve ["repository"]
         val url      = retrieve ["url"]
         val branch   = retrieve ["branch"]
-        val user_pin = retrieve ["pin"]
-        val lock_pin = case lookup_optional lock_json ["libs", libname] of
-                           SOME ll => lookup_optional_string ll ["pin"]
-                         | NONE => NONE
+        val project_pin = case retrieve ["pin"] of
+                              NONE => UNPINNED
+                            | SOME p => PINNED p
+        val lock_pin = case lookup_optional lock_json [libobjname, libname] of
+                           NONE => UNPINNED
+                         | SOME ll => case lookup_optional_string ll ["pin"] of
+                                          SOME p => PINNED p
+                                        | NONE => UNPINNED
     in
         {
           libname = libname,
@@ -1392,12 +1432,8 @@ fun load_libspec spec_json lock_json libname : libspec =
                        SERVICE_SOURCE { service = ss, owner = owner, repo = repo }
                      | _ => raise Fail ("Must have exactly one of service " ^
                                         "or url string"),
-          pin = case lock_pin of
-                    SOME p => PINNED p
-                  | NONE =>
-                    case user_pin of
-                        SOME p => PINNED p
-                      | NONE => UNPINNED,
+          project_pin = project_pin,
+          lock_pin = lock_pin,
           branch = case branch of
                        SOME b => BRANCH b
                      | NONE => DEFAULT_BRANCH
@@ -1427,7 +1463,11 @@ fun load_userconfig () : userconfig =
         }
     end
 
-fun load_project (userconfig : userconfig) rootpath use_locks : project =
+datatype pintype =
+         NO_LOCKFILE |
+         USE_LOCKFILE
+        
+fun load_project (userconfig : userconfig) rootpath pintype : project =
     let val spec_file = FileBits.project_spec_path rootpath
         val lock_file = FileBits.project_lock_path rootpath
         val _ = if OS.FileSys.access (spec_file, [OS.FileSys.A_READ])
@@ -1439,14 +1479,14 @@ fun load_project (userconfig : userconfig) rootpath use_locks : project =
                                  ".\nPlease ensure the spec file is in the " ^
                                  "project root and run this from there.")
         val spec_json = JsonBits.load_json_from spec_file
-        val lock_json = if use_locks
+        val lock_json = if pintype = USE_LOCKFILE
                         then JsonBits.load_json_from lock_file
                              handle IO.Io _ => Json.OBJECT []
                         else Json.OBJECT []
         val extdir = JsonBits.lookup_mandatory_string spec_json
                                                       ["config", "extdir"]
-        val spec_libs = JsonBits.lookup_optional spec_json ["libs"]
-        val lock_libs = JsonBits.lookup_optional lock_json ["libs"]
+        val spec_libs = JsonBits.lookup_optional spec_json [libobjname]
+        val lock_libs = JsonBits.lookup_optional lock_json [libobjname]
         val providers = Provider.load_more_providers
                             (#providers userconfig) spec_json
         val libnames = case spec_libs of
@@ -1470,11 +1510,11 @@ fun save_lock_file rootpath locks =
         open Json
         val lock_json =
             OBJECT [
-                ("libs", OBJECT
-                             (map (fn { libname, id_or_tag } =>
-                                      (libname,
-                                       OBJECT [ ("pin", STRING id_or_tag) ]))
-                                  locks))
+                (libobjname,
+                 OBJECT (map (fn { libname, id_or_tag } =>
+                                 (libname,
+                                  OBJECT [ ("pin", STRING id_or_tag) ]))
+                             locks))
             ]
     in
         JsonBits.save_json_to lock_file lock_json
@@ -1489,12 +1529,13 @@ fun hline_to 0 = ""
 
 val libname_width = 25
 val libstate_width = 11
-val localstate_width = 9
+val localstate_width = 17
 val notes_width = 5
 val divider = " | "
+val clear_line = "\r" ^ pad_to 80 "";
 
 fun print_status_header () =
-    print ("\r" ^ pad_to 80 "" ^ "\n " ^
+    print (clear_line ^ "\n " ^
            pad_to libname_width "Library" ^ divider ^
            pad_to libstate_width "State" ^ divider ^
            pad_to localstate_width "Local" ^ divider ^
@@ -1505,7 +1546,7 @@ fun print_status_header () =
            hline_to notes_width ^ "\n")
 
 fun print_outcome_header () =
-    print ("\r" ^ pad_to 80 "" ^ "\n " ^
+    print (clear_line ^ "\n " ^
            pad_to libname_width "Library" ^ divider ^
            pad_to libstate_width "Outcome" ^ divider ^
            "Notes" ^ "\n " ^
@@ -1524,8 +1565,9 @@ fun print_status with_network (libname, status) =
         val localstate_str =
             case status of
                 OK (_, MODIFIED) => "Modified"
-              | OK (_, UNMODIFIED) => "Clean"
-              | _ => ""
+              | OK (_, LOCK_MISMATCHED) => "Differs from Lock"
+              | OK (_, CLEAN) => "Clean"
+              | ERROR _ => ""
         val error_str =
             case status of
                 ERROR e => e
@@ -1599,15 +1641,35 @@ fun update_project ({ context, libs } : project) =
         return_code
     end
 
-fun load_local_project use_locks =
+fun lock_project ({ context, libs } : project) =
+    let val outcomes = map (fn lib =>
+                               (#libname lib, AnyLibControl.id_of context lib))
+                           libs
+        val locks =
+            List.concat
+                (map (fn (libname, result) =>
+                         case result of
+                             ERROR _ => []
+                           | OK id => [{ libname = libname, id_or_tag = id }])
+                     outcomes)
+        val return_code = return_code_for outcomes
+        val _ = print clear_line
+    in
+        if OS.Process.isSuccess return_code
+        then save_lock_file (#rootpath context) locks
+        else ();
+        return_code
+    end
+        
+fun load_local_project pintype =
     let val userconfig = load_userconfig ()
         val rootpath = OS.FileSys.getDir ()
     in
-        load_project userconfig rootpath use_locks
+        load_project userconfig rootpath pintype
     end    
 
-fun with_local_project use_locks f =
-    let val return_code = f (load_local_project use_locks)
+fun with_local_project pintype f =
+    let val return_code = f (load_local_project pintype)
                           handle e =>
                                  (print ("Failed with exception: " ^
                                          (exnMessage e) ^ "\n");
@@ -1617,10 +1679,11 @@ fun with_local_project use_locks f =
         return_code
     end
         
-fun review () = with_local_project false review_project
-fun status () = with_local_project false status_of_project
-fun update () = with_local_project false update_project
-fun install () = with_local_project true update_project
+fun review () = with_local_project USE_LOCKFILE review_project
+fun status () = with_local_project USE_LOCKFILE status_of_project
+fun update () = with_local_project NO_LOCKFILE update_project
+fun lock () = with_local_project NO_LOCKFILE lock_project
+fun install () = with_local_project USE_LOCKFILE update_project
 
 fun version () =
     (print ("v" ^ vext_version ^ "\n");
@@ -1637,6 +1700,7 @@ fun usage () =
             ^ "  review   check configured libraries against their providers, and report\n"
             ^ "  install  update configured libraries according to project specs and lock file\n"
             ^ "  update   update configured libraries and lock file according to project specs\n"
+            ^ "  lock     update lock file to match local library status\n"
             ^ "  version  print the Vext version number and exit\n\n");
     OS.Process.failure)
 
@@ -1647,6 +1711,7 @@ fun vext args =
               | ["status"] => status ()
               | ["install"] => install ()
               | ["update"] => update ()
+              | ["lock"] => lock ()
               | ["version"] => version ()
               | _ => usage ()
     in

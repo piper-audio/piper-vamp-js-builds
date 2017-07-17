@@ -9,7 +9,7 @@
 	    "auth": "https://{account}@code.soundsoftware.ac.uk/{vcs}/{repo}"
 	}
     },
-    "libs": {
+    "libraries": {
         "vamp-plugin-sdk": {
             "vcs": "hg",
             "service": "soundsoftware"

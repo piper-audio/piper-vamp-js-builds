@@ -1,16 +1,16 @@
 {
-  "libs": {
+  "libraries": {
     "vamp-plugin-sdk": {
       "pin": "5d9af3140f05"
     },
     "piper": {
-      "pin": "169626171d22e6c49c6bc4759283406f4336a5cb"
+      "pin": "1beb47e41a2a02d75d0fb9204e1b7b95440f3ceb"
     },
     "piper-vamp-cpp": {
-      "pin": "b146634c3686168a9d4bb739986d065b5d2d40a2"
+      "pin": "85394095a5b04f99a0785ccd32a5a98c90d984b2"
     },
     "piper-vamp-js": {
-      "pin": "06b800f3176c4a932b0738abf7bec41282d15a1e"
+      "pin": "8e7ac2e7d31976119205bfdf43008902b5d6c224"
     },
     "vamp-test-plugin": {
       "pin": "96cb7ef3cc24"
