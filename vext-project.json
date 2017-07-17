@@ -69,6 +69,10 @@
         "tipic": {
             "vcs": "hg",
             "service": "soundsoftware"
+        },
+        "tuning-difference": {
+            "vcs": "hg",
+            "service": "soundsoftware"
         }
     }
 }
