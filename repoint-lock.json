@@ -1,28 +1,28 @@
 {
   "libraries": {
     "vamp-plugin-sdk": {
-      "pin": "5d9af3140f05"
+      "pin": "328cb056da44"
     },
     "piper": {
-      "pin": "1beb47e41a2a02d75d0fb9204e1b7b95440f3ceb"
+      "pin": "dde809643316e7bb606fc14d66e55f07059bcf36"
     },
     "piper-vamp-cpp": {
-      "pin": "85394095a5b04f99a0785ccd32a5a98c90d984b2"
+      "pin": "28a0ee2cc737a7b50ac62d5996191cd589c047c2"
     },
     "piper-vamp-js": {
-      "pin": "8e7ac2e7d31976119205bfdf43008902b5d6c224"
+      "pin": "586aa8fe4cb3e529f70a7a128d21d150c3e2feb8"
     },
     "vamp-test-plugin": {
       "pin": "96cb7ef3cc24"
     },
     "vamp-build-and-test": {
-      "pin": "06c2a5337d56"
+      "pin": "08f7d7cdf1df"
     },
     "cepstral-pitchtracker": {
       "pin": "759ea6e988fe"
     },
     "constant-q-cpp": {
-      "pin": "445f94d0cb4e"
+      "pin": "390d3c69ab40"
     },
     "match-vamp-plugin": {
       "pin": "4b272c839f7e"
@@ -34,7 +34,7 @@
       "pin": "550d5f186abb"
     },
     "qm-vamp-plugins": {
-      "pin": "50042f3189ca"
+      "pin": "35c5f31a7aaf"
     },
     "silvet": {
       "pin": "426ce52ef096"
