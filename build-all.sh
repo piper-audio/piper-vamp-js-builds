@@ -7,7 +7,13 @@ fi
 
 set -eu
 
-./vext install
+./repoint install
+
+for x in ext/* ; do
+    if [ -f "$x"/repoint-project.json ]; then
+        ( cd "$x" && ../../repoint install )
+    fi
+done
 
 for x in *; do
     if [ -d "$x" ] && [ -d "ext/$x" ] && [ -f "$x/Makefile" ]; then

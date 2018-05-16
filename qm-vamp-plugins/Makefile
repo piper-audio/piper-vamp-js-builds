@@ -5,7 +5,7 @@ QM_VAMP_PLUGINS_DIR	:= ../ext/qm-vamp-plugins
 MODULE_NAME	:= QMVampPlugins
 
 QMV	:= $(QM_VAMP_PLUGINS_DIR)
-DSP	:= $(QMV)/qm-dsp
+DSP	:= $(QMV)/lib/qm-dsp
 EXT	:= $(DSP)/ext
 
 INCLUDES	:= -I$(QMV) -I$(DSP) -I$(EXT)/kissfft -I$(EXT)/kissfft/tools
